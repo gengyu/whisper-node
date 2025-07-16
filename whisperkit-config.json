@@ -1,0 +1,7 @@
+{
+  "whisperkitCliPath": "/Users/gengyu/github/focus-bot/packages/whisperkit-node/bin/whisperkit-cli",
+  "modelPath": "/Users/gengyu/github/focus-bot/packages/whisperkit-node/models",
+  "tempDir": "/Users/gengyu/github/focus-bot/packages/whisperkit-node/temp",
+  "outputDir": "/Users/gengyu/github/focus-bot/packages/whisperkit-node/output",
+  "ffmpegPath": "/Users/gengyu/github/focus-bot/packages/whisperkit-node/bin/ffmpeg"
+}

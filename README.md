@@ -1,0 +1,837 @@
+# Whisper Subtitle Generator
+
+🎬 **专业的多引擎语音识别与字幕生成工具**
+
+实现视频语音识别，自动添加字幕的功能，支持多种语音识别引擎，提供Web界面、API接口和桌面应用。
+
+[![CI/CD Pipeline](https://github.com/whisper-subtitle/whisper-subtitle/workflows/CI/CD%20Pipeline/badge.svg)](https://github.com/whisper-subtitle/whisper-subtitle/actions)
+[![Docker Pulls](https://img.shields.io/docker/pulls/whispersubtitle/whisper-subtitle)](https://hub.docker.com/r/whispersubtitle/whisper-subtitle)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![Python Version](https://img.shields.io/badge/python-3.8%2B-blue)](https://www.python.org/downloads/)
+
+## ✨ 核心特性
+
+### 🚀 多引擎支持
+- **OpenAI Whisper** - 全平台支持，高精度识别
+- **Faster Whisper** - Windows/Linux优化，支持tiny/medium/large-v2模型
+- **WhisperKit** - macOS M系列芯片专用，large-v2模型
+- **Whisper.cpp** - 全平台C++实现，large-v2模型推荐
+- **阿里云ASR** - 云端识别服务，全平台支持
+
+### 🌐 多种部署方式
+- **Web应用** - 现代化响应式界面
+- **REST API** - 完整的RESTful接口
+- **命令行工具** - 批量处理和自动化
+- **桌面应用** - macOS/Linux/Windows客户端
+- **Docker容器** - 一键部署和扩展
+
+### 📹 全格式支持
+- **视频格式**: MP4, AVI, MOV, MKV, WEBM, FLV
+- **音频格式**: MP3, WAV, FLAC, M4A, AAC, OGG
+- **输出格式**: SRT, VTT, TXT, JSON
+- **YouTube支持**: 直接URL处理和频道监控
+
+### ⚡ 高级功能
+- **自动安装** - 引擎、模型和依赖自动配置
+- **镜像加速** - 国内用户友好的安装体验
+- **批量处理** - 多文件并行转录
+- **定时任务** - YouTube频道自动监控
+- **进度跟踪** - 实时处理状态显示
+- **字幕优化** - 智能分割、合并和过滤
+
+## Features
+
+- **多种语音识别引擎支持**:
+  - OpenAI Whisper (全平台)
+  - Faster Whisper (Windows/Linux)
+  - WhisperKit (macOS M系列芯片)
+  - Whisper.cpp (全平台)
+  - 阿里云ASR (全平台)
+
+- **多种接口**:
+  - 命令行界面 (CLI)
+  - Web API (FastAPI)
+  - 现代化Web界面
+
+- **文件支持**:
+  - 音频格式: MP3, WAV, FLAC, M4A, AAC, OGG
+  - 视频格式: MP4, AVI, MOV, MKV, WEBM
+  - YouTube URL处理
+
+- **输出格式**:
+  - SRT (SubRip)
+  - VTT (WebVTT)
+  - TXT (纯文本)
+
+- **高级功能**:
+  - 批量处理
+  - YouTube频道监控
+  - 字幕段落后处理 (合并、分割、过滤)
+  - 后台任务调度
+  - 进度跟踪
+
+## 🚀 快速开始
+
+### 方式一：自动安装脚本（推荐）
+
+```bash
+# 克隆项目
+git clone https://github.com/whisper-subtitle/whisper-subtitle.git
+cd whisper-subtitle
+
+# 运行自动安装脚本
+python install.py
+```
+
+自动安装脚本将会：
+- ✅ 检查Python版本兼容性
+- ✅ 创建虚拟环境
+- ✅ 安装Python依赖（使用清华镜像加速）
+- ✅ 安装FFmpeg
+- ✅ 配置WhisperKit（macOS M系列芯片）
+- ✅ 创建必要目录
+- ✅ 生成默认配置文件
+- ✅ 运行安装测试
+
+### 方式二：Docker部署
+
+```bash
+# 使用docker-compose（推荐）
+docker-compose up -d
+
+# 或直接使用Docker
+docker run -d \
+  --name whisper-subtitle \
+  -p 8000:8000 \
+  -v $(pwd)/uploads:/app/uploads \
+  -v $(pwd)/output:/app/output \
+  whispersubtitle/whisper-subtitle:latest
+```
+
+### 方式三：手动安装
+
+**前置要求：**
+- Python 3.8+ 
+- FFmpeg
+- Git
+
+**步骤：**
+
+1. **安装FFmpeg**
+## 🐳 Docker部署
+
+### 基础部署
+
+```bash
+# 拉取镜像
+docker pull whispersubtitle/whisper-subtitle:latest
+
+# 运行容器
+docker run -d \
+  --name whisper-subtitle \
+  -p 8000:8000 \
+  -v $(pwd)/uploads:/app/uploads \
+  -v $(pwd)/output:/app/output \
+  -v $(pwd)/models:/app/models \
+  -e DEBUG=false \
+  whispersubtitle/whisper-subtitle:latest
+```
+
+### Docker Compose部署
+
+```bash
+# 生产环境
+docker-compose up -d
+
+# 开发环境
+docker-compose --profile dev up -d
+
+# 包含缓存和数据库
+docker-compose --profile cache --profile database up -d
+```
+
+### 自定义构建
+
+```bash
+# 构建镜像
+docker build -t my-whisper-subtitle .
+
+# 多平台构建
+docker buildx build --platform linux/amd64,linux/arm64 -t my-whisper-subtitle .
+```
+
+## 🏗️ 开发指南
+
+### 开发环境设置
+
+```bash
+# 克隆项目
+git clone https://github.com/whisper-subtitle/whisper-subtitle.git
+cd whisper-subtitle
+
+# 创建开发环境
+python -m venv venv
+source venv/bin/activate
+
+# 安装开发依赖
+pip install -r requirements.txt
+pip install -e ".[dev]"
+
+# 安装pre-commit钩子
+pre-commit install
+```
+
+### 代码质量检查
+
+```bash
+# 代码格式化
+black src/
+isort src/
+
+# 代码检查
+flake8 src/
+mypy src/
+
+# 运行测试
+pytest tests/ -v --cov=whisper_subtitle
+
+# 运行所有检查
+make check
+```
+
+### 构建桌面应用
+
+```bash
+# 构建当前平台应用
+python build_app.py
+
+# 构建特定平台（需要对应环境）
+python build_app.py --platform windows
+python build_app.py --platform macos
+python build_app.py --platform linux
+```
+
+## 🔧 故障排除
+
+### 常见问题
+
+**1. FFmpeg未找到**
+```bash
+# 检查FFmpeg安装
+ffmpeg -version
+
+# 重新安装FFmpeg
+# macOS: brew install ffmpeg
+# Ubuntu: sudo apt install ffmpeg
+# Windows: choco install ffmpeg
+```
+
+**2. 模型下载失败**
+```bash
+# 手动下载模型
+wst models download --engine openai_whisper --model base
+
+# 使用镜像下载
+export HF_ENDPOINT=https://hf-mirror.com
+wst models download --engine openai_whisper --model base
+```
+
+**3. WhisperKit不可用（macOS）**
+```bash
+# 检查系统要求
+system_profiler SPHardwareDataType | grep "Chip"
+
+# 手动安装WhisperKit CLI
+brew install whisperkit
+```
+
+**4. 内存不足**
+```bash
+# 使用较小模型
+wst transcribe audio.mp3 --model tiny
+
+# 调整并发任务数
+export MAX_CONCURRENT_TASKS=1
+```
+
+**5. 端口被占用**
+```bash
+# 使用不同端口
+wst server start --port 8080
+
+# 查找占用进程
+lsof -i :8000
+```
+
+### 日志调试
+
+```bash
+# 启用调试模式
+export DEBUG=true
+export LOG_LEVEL=DEBUG
+
+# 查看日志
+tail -f logs/whisper_subtitle.log
+
+# 清理日志
+wst logs clean
+```
+
+## 📊 性能优化
+
+### 硬件加速
+
+```bash
+# GPU加速（NVIDIA）
+pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
+
+# 检查CUDA可用性
+python -c "import torch; print(torch.cuda.is_available())"
+```
+
+### 模型选择建议
+
+| 模型 | 大小 | 速度 | 精度 | 推荐场景 |
+|------|------|------|------|----------|
+| tiny | 39MB | 很快 | 一般 | 快速预览 |
+| base | 74MB | 快 | 好 | 日常使用 |
+| small | 244MB | 中等 | 很好 | 平衡选择 |
+| medium | 769MB | 慢 | 优秀 | 高质量需求 |
+| large | 1550MB | 很慢 | 最佳 | 专业用途 |
+
+### 批量处理优化
+
+```bash
+# 并行处理
+wst transcribe batch /path/to/files --workers 4
+
+# 使用较小模型进行批量处理
+wst transcribe batch /path/to/files --model base --engine faster_whisper
+```
+
+## 🤝 贡献指南
+
+我们欢迎所有形式的贡献！
+
+### 贡献方式
+
+1. **报告Bug** - 在Issues中描述问题
+2. **功能建议** - 提出新功能想法
+3. **代码贡献** - 提交Pull Request
+4. **文档改进** - 完善文档和示例
+5. **测试用例** - 添加测试覆盖
+
+### 开发流程
+
+1. Fork项目
+2. 创建功能分支 (`git checkout -b feature/amazing-feature`)
+3. 提交更改 (`git commit -m 'Add amazing feature'`)
+4. 推送分支 (`git push origin feature/amazing-feature`)
+5. 创建Pull Request
+
+### 代码规范
+
+- 使用Black进行代码格式化
+- 遵循PEP 8编码规范
+- 添加类型注解
+- 编写测试用例
+- 更新相关文档
+
+## 📄 许可证
+
+本项目采用MIT许可证 - 查看 [LICENSE](LICENSE) 文件了解详情。
+
+## 🙏 致谢
+
+- [OpenAI Whisper](https://github.com/openai/whisper) - 强大的语音识别模型
+- [Faster Whisper](https://github.com/guillaumekln/faster-whisper) - 优化的Whisper实现
+- [WhisperKit](https://github.com/argmaxinc/WhisperKit) - Apple Silicon优化
+- [Whisper.cpp](https://github.com/ggerganov/whisper.cpp) - C++实现
+- [yt-dlp](https://github.com/yt-dlp/yt-dlp) - YouTube下载工具
+- [FastAPI](https://fastapi.tiangolo.com/) - 现代Web框架
+
+## 📞 支持
+
+- 📖 [文档](https://whisper-subtitle.readthedocs.io/)
+- 💬 [讨论区](https://github.com/whisper-subtitle/whisper-subtitle/discussions)
+- 🐛 [问题反馈](https://github.com/whisper-subtitle/whisper-subtitle/issues)
+- 📧 [邮件支持](mailto:support@whisper-subtitle.com)
+
+---
+
+<div align="center">
+  <p>如果这个项目对您有帮助，请给我们一个⭐️</p>
+  <p>Made with ❤️ by Whisper Subtitle Team</p>
+</div>
+   # macOS
+   brew install ffmpeg
+   
+   # Ubuntu/Debian
+   sudo apt update && sudo apt install ffmpeg
+   
+   # Windows (使用Chocolatey)
+   choco install ffmpeg
+   ```
+
+2. **克隆和安装**
+   ```bash
+   git clone https://github.com/whisper-subtitle/whisper-subtitle.git
+   cd whisper-subtitle
+   
+   # 创建虚拟环境
+   python -m venv venv
+   source venv/bin/activate  # Windows: venv\Scripts\activate
+   
+   # 安装依赖
+   pip install -r requirements.txt
+   pip install -e .
+   ```
+
+3. **安装特定引擎**
+   ```bash
+   # OpenAI Whisper
+   pip install -e ".[openai]"
+   
+   # Faster Whisper
+   pip install -e ".[faster]"
+   
+   # YouTube支持
+   pip install -e ".[youtube]"
+   
+   # 阿里云ASR
+   pip install -e ".[alibaba]"
+   
+   # 安装所有引擎
+   pip install -e ".[all]"
+   ```
+
+### 桌面应用下载
+
+从 [Releases页面](https://github.com/whisper-subtitle/whisper-subtitle/releases) 下载适合您操作系统的桌面应用：
+
+- 🍎 **macOS**: `whisper-subtitle-macos.dmg`
+- 🐧 **Linux**: `whisper-subtitle-linux.AppImage`
+- 🪟 **Windows**: `whisper-subtitle-windows.exe`
+
+## 📖 使用指南
+
+### 🖥️ 命令行界面
+
+**基础转录：**
+```bash
+# 转录单个文件
+wst transcribe audio.mp3
+
+# 指定引擎和输出格式
+wst transcribe video.mp4 --engine faster_whisper --format srt
+
+# 指定语言和模型
+wst transcribe audio.wav --language zh --model medium
+
+# 批量处理
+wst transcribe batch /path/to/files --output-dir ./output
+```
+
+**YouTube处理：**
+```bash
+# 下载并转录YouTube视频
+wst youtube transcribe "https://www.youtube.com/watch?v=VIDEO_ID"
+
+# 添加频道监控
+wst youtube add @channelname "频道名称" --engine openai_whisper
+
+# 列出监控频道
+wst youtube list
+
+# 手动检查新视频
+wst youtube check
+
+# 启动定时监控
+wst youtube monitor --interval 3600  # 每小时检查一次
+```
+
+**服务器管理：**
+```bash
+# 启动Web服务器
+wst server start --host 0.0.0.0 --port 8000
+
+# 后台运行
+wst server start --daemon
+
+# 停止服务器
+wst server stop
+
+# 查看服务状态
+wst server status
+```
+
+**系统管理：**
+```bash
+# 查看系统信息
+wst info
+
+# 检查引擎状态
+wst check
+
+# 列出可用引擎
+wst engines list
+
+# 安装引擎
+wst engines install faster_whisper
+
+# 下载模型
+wst models download --engine openai_whisper --model base
+```
+
+### 🌐 Web界面
+
+1. **启动服务器：**
+   ```bash
+   wst server start
+   ```
+
+2. **访问界面：**
+   - 🎬 **主界面**: http://localhost:8000
+   - 📚 **API文档**: http://localhost:8000/docs
+   - 🔍 **交互式API**: http://localhost:8000/redoc
+   - ❤️ **健康检查**: http://localhost:8000/api/v1/health
+
+3. **Web功能特性：**
+   - 📁 拖拽上传文件
+   - 🔗 YouTube URL直接处理
+   - ⚙️ 引擎和模型选择
+   - 🌍 语言自动检测
+   - 📊 实时进度显示
+   - 📥 多格式下载
+   - 📱 响应式设计
+
+### 🖥️ 桌面应用
+
+桌面应用提供与Web界面相同的功能，但无需手动启动服务器：
+
+1. **下载并安装**对应平台的应用
+2. **启动应用**，会自动打开浏览器
+3. **开始使用**，享受本地化体验
+
+**桌面应用优势：**
+- 🚀 一键启动，无需配置
+- 🔒 本地处理，数据安全
+- 💾 离线使用，无需网络
+- 🎯 系统集成，文件关联
+
+### 🐍 Python API
+
+```python
+import asyncio
+from whisper_subtitle.core.transcription import TranscriptionService
+from whisper_subtitle.config.settings import Settings
+
+async def main():
+    # 初始化服务
+    settings = Settings()
+    service = TranscriptionService(settings)
+    
+    # 转录本地文件
+    result = await service.transcribe_file(
+        file_path="audio.mp3",
+        engine="openai_whisper",
+        model="base",
+        language="auto",
+        output_format="srt"
+    )
+    
+    print(f"转录完成: {result.output_path}")
+    print(f"处理时长: {result.duration}秒")
+    
+    # 转录YouTube视频
+    youtube_result = await service.transcribe_youtube(
+        url="https://www.youtube.com/watch?v=VIDEO_ID",
+        engine="faster_whisper",
+        output_format="vtt"
+    )
+    
+    print(f"YouTube转录完成: {youtube_result.output_path}")
+
+# 运行示例
+if __name__ == "__main__":
+    asyncio.run(main())
+```
+
+### 🔌 REST API
+
+```python
+import requests
+import time
+
+# 上传文件并开始转录
+with open("audio.mp3", "rb") as f:
+    response = requests.post(
+        "http://localhost:8000/api/v1/transcribe",
+        files={"file": f},
+        data={
+            "engine": "openai_whisper",
+            "model": "base",
+            "language": "auto",
+            "output_format": "srt"
+        }
+    )
+
+task_id = response.json()["task_id"]
+print(f"任务ID: {task_id}")
+
+# 轮询任务状态
+while True:
+    status_response = requests.get(
+        f"http://localhost:8000/api/v1/transcribe/{task_id}/status"
+    )
+    status = status_response.json()
+    
+    print(f"状态: {status['status']} - 进度: {status['progress']}%")
+    
+    if status["status"] == "completed":
+        print(f"下载链接: {status['download_url']}")
+        break
+    elif status["status"] == "failed":
+        print(f"错误: {status['error']}")
+        break
+    
+    time.sleep(2)
+```
+
+## ⚙️ 配置说明
+
+### 配置文件 (.env)
+
+```bash
+# 基础配置
+DEBUG=false
+LOG_LEVEL=INFO
+HOST=0.0.0.0
+PORT=8000
+
+# 目录配置
+UPLOADS_DIR=./uploads
+DOWNLOADS_DIR=./downloads
+OUTPUT_DIR=./output
+TEMP_DIR=./temp
+MODELS_DIR=./models
+LOGS_DIR=./logs
+BIN_DIR=./bin
+
+# 文件限制
+MAX_FILE_SIZE=500  # MB
+MAX_DURATION=7200  # 秒
+
+# 默认设置
+DEFAULT_ENGINE=openai_whisper
+DEFAULT_MODEL=base
+DEFAULT_LANGUAGE=auto
+DEFAULT_OUTPUT_FORMAT=srt
+
+# 引擎配置
+OPENAI_WHISPER_ENABLED=true
+FASTER_WHISPER_ENABLED=true
+WHISPERKIT_ENABLED=true
+WHISPER_CPP_ENABLED=true
+ALIBABA_ASR_ENABLED=false
+
+# 阿里云ASR配置
+ALIBABA_ACCESS_KEY_ID=your_access_key
+ALIBABA_ACCESS_KEY_SECRET=your_secret_key
+ALIBABA_REGION=cn-shanghai
+
+# YouTube配置
+YOUTUBE_ENABLED=true
+YOUTUBE_QUALITY=best[height<=720]
+YOUTUBE_AUDIO_FORMAT=mp3
+
+# 任务配置
+MAX_CONCURRENT_TASKS=3
+TASK_TIMEOUT=3600
+CLEANUP_INTERVAL=86400
+
+# 监控配置
+MONITOR_INTERVAL=3600
+MONITOR_ENABLED=false
+```
+
+### 高级配置 (config.yaml)
+
+```yaml
+# 引擎详细配置
+engines:
+  openai_whisper:
+    enabled: true
+    models: ["tiny", "base", "small", "medium", "large"]
+    default_model: "base"
+    device: "auto"  # auto, cpu, cuda
+    
+  faster_whisper:
+    enabled: true
+    models: ["tiny", "base", "small", "medium", "large-v2"]
+    default_model: "base"
+    device: "auto"
+    compute_type: "auto"  # auto, int8, float16, float32
+    
+  whisperkit:
+    enabled: true
+    models: ["large-v2"]
+    default_model: "large-v2"
+    
+  whisper_cpp:
+    enabled: true
+    models: ["base", "small", "medium", "large-v2"]
+    default_model: "base"
+    threads: 4
+    
+  alibaba_asr:
+    enabled: false
+    region: "cn-shanghai"
+    format: "pcm"
+    sample_rate: 16000
+
+# 后处理配置
+post_processing:
+  merge_segments:
+    enabled: true
+    max_gap: 2.0  # 秒
+    min_duration: 1.0  # 秒
+    
+  filter_segments:
+    enabled: true
+    min_confidence: 0.5
+    remove_music: true
+    remove_noise: true
+    
+  split_segments:
+    enabled: false
+    max_duration: 30.0  # 秒
+    split_on_silence: true
+
+# 监控配置
+monitoring:
+  channels: []
+  check_interval: 3600  # 秒
+  max_videos_per_check: 10
+  download_quality: "best[height<=720]"
+  auto_transcribe: true
+  
+# 通知配置
+notifications:
+  email:
+    enabled: false
+    smtp_server: "smtp.gmail.com"
+    smtp_port: 587
+    username: "your_email@gmail.com"
+    password: "your_password"
+    
+  webhook:
+    enabled: false
+    url: "https://your-webhook-url.com"
+    
+# 缓存配置
+cache:
+  enabled: true
+  backend: "memory"  # memory, redis
+  ttl: 3600  # 秒
+  
+# 数据库配置
+database:
+  url: "sqlite:///./whisper_subtitle.db"
+  # url: "postgresql://user:pass@localhost/whisper_subtitle"
+```
+
+### 环境变量优先级
+
+1. 命令行参数（最高优先级）
+2. 环境变量
+3. .env文件
+4. config.yaml文件
+5. 默认值（最低优先级）
+   wst --config custom-config.yaml transcribe audio.mp3
+   ```
+
+## API文档
+
+服务器运行后，访问 http://localhost:8000/docs 查看交互式API文档。
+
+### 主要端点
+
+- `POST /api/v1/transcribe` - 转录音视频文件
+- `POST /api/v1/upload` - 上传文件进行转录
+- `GET /api/v1/engines` - 列出可用引擎
+- `GET /api/v1/models` - 列出可用模型
+- `POST /api/v1/youtube/channels` - 添加YouTube频道监控
+- `GET /api/v1/tasks/{task_id}` - 获取任务状态
+
+## 语音识别引擎
+
+### OpenAI Whisper
+- **安装**: `pip install openai-whisper`
+- **模型**: tiny, base, small, medium, large
+- **语言**: 99+ 种语言
+- **特点**: 高精度，多语言支持
+
+### Faster Whisper
+- **安装**: `pip install faster-whisper`
+- **模型**: 与OpenAI Whisper相同
+- **特点**: 推理速度快4倍，内存使用更少
+
+### WhisperKit (仅macOS)
+- **要求**: 搭载Apple Silicon的macOS
+- **特点**: 针对Apple硬件优化
+
+### Whisper.cpp
+- **安装**: `pip install whispercpp`
+- **特点**: C++实现，推理速度快
+
+### 阿里云ASR
+- **要求**: 阿里云账户和API凭证
+- **特点**: 基于云端，中文识别精度高
+
+## 开发
+
+### 设置开发环境
+
+```bash
+git clone https://github.com/whisper-subtitle/whisper-subtitle.git
+cd whisper-subtitle
+
+# 开发模式安装
+pip install -e ".[dev]"
+
+# 安装pre-commit钩子
+pre-commit install
+```
+
+### 运行测试
+
+```bash
+# 运行所有测试
+pytest
+
+# 运行覆盖率测试
+pytest --cov=whisper_subtitle
+
+# 运行特定测试文件
+pytest tests/test_transcription.py
+```
+
+### 代码格式化
+
+```bash
+# 格式化代码
+black src/
+isort src/
+
+# 检查代码风格
+flake8 src/
+mypy src/
+```
+
+## 许可证
+
+本项目采用MIT许可证 - 详见 [LICENSE](LICENSE) 文件。
+ 
+
+

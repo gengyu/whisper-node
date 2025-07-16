@@ -1,0 +1,1 @@
+"""Core modules for Whisper Subtitle Generator."""
