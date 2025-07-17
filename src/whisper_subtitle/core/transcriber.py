@@ -12,6 +12,7 @@ from ..engines.whisperkit import WhisperKitEngine
 from ..engines.whispercpp import WhisperCppEngine
 from ..engines.alibaba_asr import AlibabaASREngine
 from ..utils.audio import AudioProcessor
+from ..utils.video import VideoDownloader
 from ..config.settings import settings
 
 logger = logging.getLogger(__name__)
@@ -22,6 +23,7 @@ class TranscriptionService:
     
     def __init__(self):
         self.audio_processor = AudioProcessor()
+        self.video_downloader = VideoDownloader()
         self._engines: Dict[str, BaseEngine] = {}
         self._initialize_engines()
     
@@ -246,3 +248,58 @@ class TranscriptionService:
         
         logger.info(f"Batch transcription completed")
         return final_results
+    
+    async def transcribe_youtube(
+        self,
+        url: str,
+        engine_name: str = "openai_whisper",
+        model_name: str = "medium",
+        language: Optional[str] = None,
+        output_format: str = "srt",
+        **kwargs
+    ) -> TranscriptionResult:
+        """Transcribe YouTube video by downloading audio first.
+        
+        Args:
+            url: YouTube video URL
+            engine_name: Name of the engine to use
+            model_name: Model name/size to use
+            language: Language code (auto-detect if None)
+            output_format: Output format (srt, vtt, txt, json)
+            **kwargs: Additional engine-specific parameters
+        
+        Returns:
+            TranscriptionResult with transcription data
+        """
+        logger.info(f"Starting YouTube transcription for: {url}")
+        
+        try:
+            # Download audio from YouTube
+            audio_path = await self.video_downloader.download_video(
+                url=url,
+                output_path=None,  # Auto-generate path
+                audio_only=True
+            )
+            
+            if not audio_path or not audio_path.exists():
+                raise RuntimeError("Failed to download audio from YouTube")
+            
+            logger.info(f"Audio downloaded successfully: {audio_path}")
+            
+            # Transcribe the downloaded audio
+            result = await self.transcribe_audio(
+                audio_path=audio_path,
+                engine_name=engine_name,
+                model_name=model_name,
+                language=language,
+                output_format=output_format,
+                **kwargs
+            )
+            
+            logger.info(f"YouTube transcription completed: {result.output_path}")
+            return result
+            
+        except Exception as e:
+            error_msg = f"YouTube transcription failed: {str(e)}"
+            logger.error(error_msg)
+            raise RuntimeError(error_msg)

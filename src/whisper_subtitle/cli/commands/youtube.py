@@ -641,3 +641,126 @@ def status(
         if ctx.obj.get('verbose'):
             console.print_exception()
         sys.exit(1)
+
+
+@youtube.command()
+@click.argument('url')
+@click.option(
+    '--engine', '-e',
+    type=click.Choice(['openai_whisper', 'faster_whisper', 'whisperkit', 'whispercpp', 'alibaba_asr']),
+    default='openai_whisper',
+    help='Speech recognition engine to use'
+)
+@click.option(
+    '--model', '-m',
+    help='Model to use for transcription (e.g., tiny, base, small, medium, large)'
+)
+@click.option(
+    '--language', '-l',
+    help='Language code for transcription (auto-detect if not specified)'
+)
+@click.option(
+    '--format', '-f',
+    type=click.Choice(['srt', 'vtt', 'txt', 'json']),
+    default='srt',
+    help='Output format for transcription'
+)
+@click.option(
+    '--output', '-o',
+    help='Output file path (auto-generated if not specified)'
+)
+@click.pass_context
+def transcribe(
+    ctx,
+    url: str,
+    engine: str,
+    model: Optional[str],
+    language: Optional[str],
+    format: str,
+    output: Optional[str]
+):
+    """Transcribe a YouTube video directly.
+    
+    URL: YouTube video URL to transcribe
+    """
+    
+    try:
+        from ...core.transcriber import TranscriptionService
+        from pathlib import Path
+        import time
+        
+        console.print(f"[blue]Starting YouTube transcription...[/blue]")
+        console.print(f"[dim]URL: {url}[/dim]")
+        console.print(f"[dim]Engine: {engine}[/dim]")
+        console.print(f"[dim]Model: {model or 'default'}[/dim]")
+        console.print(f"[dim]Language: {language or 'auto-detect'}[/dim]")
+        console.print(f"[dim]Format: {format}[/dim]")
+        console.print()
+        
+        # Initialize transcription service
+        service = TranscriptionService()
+        
+        # Prepare transcription parameters
+        transcribe_kwargs = {}
+        if model:
+            transcribe_kwargs['model_name'] = model
+        if language:
+            transcribe_kwargs['language'] = language
+        
+        # Start transcription with progress
+        with Progress(
+            SpinnerColumn(),
+            TextColumn("[progress.description]{task.description}"),
+            console=console
+        ) as progress:
+            task = progress.add_task("Downloading and transcribing...", total=None)
+            
+            start_time = time.time()
+            
+            # Run transcription
+            result = asyncio.run(
+                service.transcribe_youtube(
+                    url=url,
+                    engine_name=engine,
+                    output_format=format,
+                    **transcribe_kwargs
+                )
+            )
+            
+            progress.stop()
+            
+            end_time = time.time()
+            duration = end_time - start_time
+        
+        # Handle output file
+        if output:
+            output_path = Path(output)
+            if result.output_path != output_path:
+                # Move/copy to specified output path
+                output_path.parent.mkdir(parents=True, exist_ok=True)
+                import shutil
+                shutil.move(str(result.output_path), str(output_path))
+                result.output_path = output_path
+        
+        # Show success message
+        console.print(f"[green]✓ Transcription completed: {result.output_path}[/green]")
+        console.print(f"[dim]Processing time: {duration:.2f} seconds[/dim]")
+        
+        # Show preview of transcription
+        if result.output_path.exists():
+            console.print("\n[bold]First few lines of transcription:[/bold]")
+            with open(result.output_path, 'r', encoding='utf-8') as f:
+                lines = f.readlines()[:6]  # Show first 6 lines
+                preview = ''.join(lines).strip()
+                if preview:
+                    console.print(f"[dim]{preview}[/dim]")
+                    if len(lines) == 6:
+                        console.print("[dim]...[/dim]")
+        
+        console.print(f"\n[green]🎉 YouTube transcription completed successfully![/green]")
+        
+    except Exception as e:
+        console.print(f"[red]✗ Transcription failed: {e}[/red]")
+        if ctx.obj and ctx.obj.get('verbose'):
+            console.print_exception()
+        sys.exit(1)
