@@ -157,6 +157,7 @@ class Settings(BaseSettings):
         env_prefix = "WHISPER_SUBTITLE_"
         env_file = ".env"
         case_sensitive = False
+        extra = "ignore"  # Ignore extra fields
         
     def __init__(self, **kwargs):
         """Initialize settings and create directories."""

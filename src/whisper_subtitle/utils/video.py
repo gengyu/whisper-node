@@ -76,14 +76,20 @@ class VideoDownloader:
             )
             
             # Find the actual downloaded file
-            downloaded_files = list(output_path.parent.glob(f"{output_path.stem}.*"))
+            downloaded_files = list(output_path.parent.glob(f"{output_path.stem}*"))
             if not downloaded_files:
                 raise RuntimeError("Download completed but no file found")
             
             actual_file = downloaded_files[0]
             
-            # Rename to expected path if different
-            if actual_file != output_path:
+            # If audio_only and no extension, add .mp3
+            if audio_only and not actual_file.suffix:
+                new_path = actual_file.with_suffix('.mp3')
+                actual_file.rename(new_path)
+                actual_file = new_path
+            
+            # Rename to expected path if different and output_path was specified
+            if output_path != Path(output_path.parent / output_path.stem) and actual_file != output_path:
                 actual_file.rename(output_path)
                 actual_file = output_path
             

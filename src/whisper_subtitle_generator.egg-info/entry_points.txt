@@ -1,0 +1,2 @@
+[console_scripts]
+whisper-subtitle = whisper_subtitle.cli:main
