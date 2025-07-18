@@ -1,0 +1,15 @@
+1
+00:00:01,000 --> 00:00:03,000
+Hello everyone, welcome to our channel.
+
+2
+00:00:04,000 --> 00:00:06,000
+Today we will learn something new.
+
+3
+00:00:07,000 --> 00:00:09,000
+Please subscribe and like this video.
+
+4
+00:00:10,000 --> 00:00:12,000
+Thank you for watching.
