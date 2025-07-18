@@ -48,3 +48,6 @@ logs/
 .yarn-integrity
 uploads
 bin
+models
+temp
+output
