@@ -36,7 +36,7 @@ async def test_youtube_download():
         downloaded_file = await downloader.download_video(
             url=test_url,
             output_path=None,  # Auto-generate path
-            audio_only=True
+            audio_only=False
         )
         
         if downloaded_file and downloaded_file.exists():

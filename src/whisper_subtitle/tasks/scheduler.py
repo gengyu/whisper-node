@@ -1,5 +1,6 @@
 """Task scheduler for background processing."""
 
+# 导入标准库模块
 import asyncio
 import logging
 from datetime import datetime, timedelta
@@ -7,50 +8,52 @@ from typing import Dict, List, Optional, Callable, Any
 from dataclasses import dataclass, field
 from enum import Enum
 
+# 配置日志记录
 logger = logging.getLogger(__name__)
 
 
 class TaskStatus(Enum):
-    """Task status enumeration."""
-    PENDING = "pending"
-    RUNNING = "running"
-    COMPLETED = "completed"
-    FAILED = "failed"
-    CANCELLED = "cancelled"
+    """任务状态枚举"""
+    PENDING = "pending"      # 待处理
+    RUNNING = "running"      # 运行中
+    COMPLETED = "completed"  # 已完成
+    FAILED = "failed"        # 失败
+    CANCELLED = "cancelled"  # 已取消
 
 
 @dataclass
 class ScheduledTask:
-    """Scheduled task data class."""
-    id: str
-    name: str
-    func: Callable
-    args: tuple = field(default_factory=tuple)
-    kwargs: dict = field(default_factory=dict)
-    schedule_time: datetime = field(default_factory=datetime.now)
-    interval: Optional[timedelta] = None
-    max_retries: int = 3
-    retry_count: int = 0
-    status: TaskStatus = TaskStatus.PENDING
-    created_at: datetime = field(default_factory=datetime.now)
-    started_at: Optional[datetime] = None
-    completed_at: Optional[datetime] = None
-    result: Any = None
-    error: Optional[str] = None
-    next_run: Optional[datetime] = None
+    """调度任务数据类，表示一个计划任务"""
+    id: str                  # 任务唯一标识
+    name: str                # 任务名称
+    func: Callable           # 要执行的函数
+    args: tuple = field(default_factory=tuple)  # 函数位置参数
+    kwargs: dict = field(default_factory=dict)  # 函数关键字参数
+    schedule_time: datetime = field(default_factory=datetime.now)  # 计划执行时间
+    interval: Optional[timedelta] = None        # 重复间隔
+    max_retries: int = 3                        # 最大重试次数
+    retry_count: int = 0                        # 已重试次数
+    status: TaskStatus = TaskStatus.PENDING     # 当前状态
+    created_at: datetime = field(default_factory=datetime.now)  # 创建时间
+    started_at: Optional[datetime] = None       # 开始时间
+    completed_at: Optional[datetime] = None     # 完成时间
+    result: Any = None                          # 执行结果
+    error: Optional[str] = None                 # 错误信息
+    next_run: Optional[datetime] = None         # 下次运行时间
 
 
 class TaskScheduler:
-    """Background task scheduler."""
+    """后台任务调度器"""
     
     def __init__(self):
-        self.tasks: Dict[str, ScheduledTask] = {}
-        self.running = False
-        self._scheduler_task: Optional[asyncio.Task] = None
-        self._lock = asyncio.Lock()
+        """初始化任务调度器"""
+        self.tasks: Dict[str, ScheduledTask] = {}  # 存储所有任务
+        self.running = False                       # 调度器运行状态
+        self._scheduler_task: Optional[asyncio.Task] = None  # 调度任务
+        self._lock = asyncio.Lock()                # 异步锁，用于线程安全操作
     
     async def start(self):
-        """Start the task scheduler."""
+        """启动任务调度器"""
         if self.running:
             logger.warning("Task scheduler is already running")
             return
@@ -60,7 +63,7 @@ class TaskScheduler:
         logger.info("Task scheduler started")
     
     async def stop(self):
-        """Stop the task scheduler."""
+        """停止任务调度器"""
         if not self.running:
             return
         
@@ -73,7 +76,7 @@ class TaskScheduler:
             except asyncio.CancelledError:
                 pass
         
-        # Cancel all pending tasks
+        # 取消所有待处理任务
         async with self._lock:
             for task in self.tasks.values():
                 if task.status == TaskStatus.RUNNING:
@@ -94,20 +97,20 @@ class TaskScheduler:
         interval: Optional[timedelta] = None,
         max_retries: int = 3
     ) -> str:
-        """Schedule a task for execution.
+        """调度一个任务以执行。
         
-        Args:
-            task_id: Unique task identifier
-            name: Task name
-            func: Function to execute
-            args: Function arguments
-            kwargs: Function keyword arguments
-            schedule_time: When to run the task (default: now)
-            interval: Repeat interval (None for one-time task)
-            max_retries: Maximum retry attempts
+        参数:
+            task_id: 任务唯一标识
+            name: 任务名称
+            func: 要执行的函数
+            args: 函数位置参数
+            kwargs: 函数关键字参数
+            schedule_time: 任务执行时间(默认:现在)
+            interval: 重复间隔(无为一次性任务)
+            max_retries: 最大重试次数
         
-        Returns:
-            Task ID
+        返回:
+            任务ID
         """
         if kwargs is None:
             kwargs = {}
@@ -134,13 +137,13 @@ class TaskScheduler:
         return task_id
     
     async def cancel_task(self, task_id: str) -> bool:
-        """Cancel a scheduled task.
+        """取消一个已调度的任务。
         
-        Args:
-            task_id: Task ID to cancel
+        参数:
+            task_id: 要取消的任务ID
         
-        Returns:
-            True if task was cancelled, False if not found or already completed
+        返回:
+            如果任务被取消则为True，如果未找到或已完成则为False
         """
         async with self._lock:
             if task_id not in self.tasks:
@@ -159,13 +162,13 @@ class TaskScheduler:
         return True
     
     async def get_task_status(self, task_id: str) -> Optional[ScheduledTask]:
-        """Get task status.
+        """获取任务状态。
         
-        Args:
-            task_id: Task ID
+        参数:
+            task_id: 任务ID
         
-        Returns:
-            Task object or None if not found
+        返回:
+            任务对象或未找到时为None
         """
         async with self._lock:
             return self.tasks.get(task_id)
@@ -175,14 +178,14 @@ class TaskScheduler:
         status: Optional[TaskStatus] = None,
         limit: Optional[int] = None
     ) -> List[ScheduledTask]:
-        """List tasks.
+        """列出任务。
         
-        Args:
-            status: Filter by status
-            limit: Maximum number of tasks to return
+        参数:
+            status: 状态过滤
+            limit: 返回的最大任务数
         
-        Returns:
-            List of tasks
+        返回:
+            任务列表
         """
         async with self._lock:
             tasks = list(self.tasks.values())
@@ -190,7 +193,7 @@ class TaskScheduler:
         if status:
             tasks = [task for task in tasks if task.status == status]
         
-        # Sort by creation time (newest first)
+        # 按创建时间排序(最新在前)
         tasks.sort(key=lambda t: t.created_at, reverse=True)
         
         if limit:
@@ -199,10 +202,10 @@ class TaskScheduler:
         return tasks
     
     async def cleanup_old_tasks(self, older_than: timedelta = timedelta(days=7)):
-        """Clean up old completed/failed tasks.
+        """清理旧的已完成/失败的任务。
         
-        Args:
-            older_than: Remove tasks older than this duration
+        参数:
+            older_than: 移除比这个时间更早的任务
         """
         cutoff_time = datetime.now() - older_than
         
@@ -221,23 +224,23 @@ class TaskScheduler:
             logger.info(f"Cleaned up {len(tasks_to_remove)} old tasks")
     
     async def _scheduler_loop(self):
-        """Main scheduler loop."""
+        """主调度循环"""
         logger.info("Scheduler loop started")
         
         while self.running:
             try:
                 await self._process_pending_tasks()
-                await asyncio.sleep(1)  # Check every second
+                await asyncio.sleep(1)  # 每秒检查一次
             except asyncio.CancelledError:
                 break
             except Exception as e:
                 logger.error(f"Error in scheduler loop: {str(e)}")
-                await asyncio.sleep(5)  # Wait before retrying
+                await asyncio.sleep(5)  # 等待后重试
         
         logger.info("Scheduler loop stopped")
     
     async def _process_pending_tasks(self):
-        """Process pending tasks that are ready to run."""
+        """处理待执行的任务"""
         now = datetime.now()
         tasks_to_run = []
         
@@ -247,15 +250,15 @@ class TaskScheduler:
                     task.next_run and task.next_run <= now):
                     tasks_to_run.append(task)
         
-        # Run tasks outside the lock to avoid blocking
+        # 在锁外运行任务以避免阻塞
         for task in tasks_to_run:
             asyncio.create_task(self._execute_task(task))
     
     async def _execute_task(self, task: ScheduledTask):
-        """Execute a single task."""
+        """执行单个任务"""
         async with self._lock:
             if task.status != TaskStatus.PENDING:
-                return  # Task was cancelled or already running
+                return  # 任务被取消或正在运行
             
             task.status = TaskStatus.RUNNING
             task.started_at = datetime.now()
@@ -263,11 +266,11 @@ class TaskScheduler:
         logger.info(f"Executing task: {task.name} (ID: {task.id})")
         
         try:
-            # Execute the task function
+            # 执行任务函数
             if asyncio.iscoroutinefunction(task.func):
                 result = await task.func(*task.args, **task.kwargs)
             else:
-                # Run synchronous function in thread pool
+                # 在线程池中运行同步函数
                 loop = asyncio.get_event_loop()
                 result = await loop.run_in_executor(
                     None, lambda: task.func(*task.args, **task.kwargs)
@@ -278,11 +281,11 @@ class TaskScheduler:
                 task.result = result
                 task.completed_at = datetime.now()
                 
-                # Schedule next run if this is a recurring task
+                # 如果是周期性任务，安排下次运行
                 if task.interval:
                     task.next_run = datetime.now() + task.interval
                     task.status = TaskStatus.PENDING
-                    task.retry_count = 0  # Reset retry count for recurring tasks
+                    task.retry_count = 0  # 重置周期性任务的重试计数
             
             logger.info(f"Task completed successfully: {task.name} (ID: {task.id})")
             
@@ -295,13 +298,13 @@ class TaskScheduler:
                 task.error = error_msg
                 
                 if task.retry_count < task.max_retries:
-                    # Schedule retry
-                    retry_delay = timedelta(minutes=2 ** task.retry_count)  # Exponential backoff
+                    # 安排重试
+                    retry_delay = timedelta(minutes=2 ** task.retry_count)  # 指数退避
                     task.next_run = datetime.now() + retry_delay
                     task.status = TaskStatus.PENDING
                     logger.info(f"Task will be retried in {retry_delay}: {task.name} (ID: {task.id})")
                 else:
-                    # Max retries reached
+                    # 达到最大重试次数
                     task.status = TaskStatus.FAILED
                     task.completed_at = datetime.now()
                     logger.error(f"Task failed permanently after {task.retry_count} retries: {task.name} (ID: {task.id})")
@@ -317,20 +320,20 @@ class TaskScheduler:
         start_time: Optional[datetime] = None,
         max_retries: int = 3
     ) -> str:
-        """Schedule a recurring task.
+        """调度一个周期性任务。
         
-        Args:
-            task_id: Unique task identifier
-            name: Task name
-            func: Function to execute
-            interval: Repeat interval
-            args: Function arguments
-            kwargs: Function keyword arguments
-            start_time: When to start (default: now)
-            max_retries: Maximum retry attempts per execution
+        参数:
+            task_id: 任务唯一标识
+            name: 任务名称
+            func: 要执行的函数
+            interval: 重复间隔
+            args: 函数位置参数
+            kwargs: 函数关键字参数
+            start_time: 开始时间(默认:现在)
+            max_retries: 每次执行的最大重试次数
         
-        Returns:
-            Task ID
+        返回:
+            任务ID
         """
         return await self.schedule_task(
             task_id=task_id,
@@ -354,26 +357,26 @@ class TaskScheduler:
         kwargs: dict = None,
         max_retries: int = 3
     ) -> str:
-        """Schedule a daily recurring task.
+        """调度一个每日周期性任务。
         
-        Args:
-            task_id: Unique task identifier
-            name: Task name
-            func: Function to execute
-            hour: Hour to run (0-23)
-            minute: Minute to run (0-59)
-            args: Function arguments
-            kwargs: Function keyword arguments
-            max_retries: Maximum retry attempts per execution
+        参数:
+            task_id: 任务唯一标识
+            name: 任务名称
+            func: 要执行的函数
+            hour: 执行小时(0-23)
+            minute: 执行分钟(0-59)
+            args: 函数位置参数
+            kwargs: 函数关键字参数
+            max_retries: 每次执行的最大重试次数
         
-        Returns:
-            Task ID
+        返回:
+            任务ID
         """
-        # Calculate next run time
+        # 计算下次运行时间
         now = datetime.now()
         next_run = now.replace(hour=hour, minute=minute, second=0, microsecond=0)
         
-        # If the time has already passed today, schedule for tomorrow
+        # 如果时间已经过去，则安排在明天
         if next_run <= now:
             next_run += timedelta(days=1)
         

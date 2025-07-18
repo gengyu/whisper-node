@@ -1,5 +1,6 @@
-"""YouTube video fetcher for scheduled downloads."""
+"""YouTube视频抓取器，用于计划下载。"""
 
+# 导入标准库模块
 import asyncio
 import logging
 from datetime import datetime, timedelta
@@ -7,40 +8,42 @@ from typing import List, Dict, Optional, Set
 from dataclasses import dataclass
 from pathlib import Path
 
+# 导入项目内模块
 from ..utils.video import VideoDownloader
 from ..core.service import TranscriptionService
 from .scheduler import TaskScheduler, TaskStatus
 
+# 配置日志记录
 logger = logging.getLogger(__name__)
 
 
 @dataclass
 class YouTubeChannel:
-    """YouTube channel configuration."""
-    channel_id: str
-    channel_name: str
-    last_check: Optional[datetime] = None
-    last_video_id: Optional[str] = None
-    enabled: bool = True
-    transcription_config: Dict = None
+    """YouTube频道配置"""
+    channel_id: str                # YouTube频道ID
+    channel_name: str              # 频道显示名称
+    last_check: Optional[datetime] = None  # 上次检查时间
+    last_video_id: Optional[str] = None   # 上次检查的视频ID
+    enabled: bool = True                   # 是否启用监控
+    transcription_config: Dict = None      # 转录配置
 
 
 @dataclass
 class VideoFetchResult:
-    """Result of video fetch operation."""
-    video_id: str
-    title: str
-    url: str
-    duration: Optional[int] = None
-    upload_date: Optional[str] = None
-    downloaded: bool = False
-    transcribed: bool = False
-    file_path: Optional[str] = None
-    error: Optional[str] = None
+    """视频抓取结果"""
+    video_id: str                  # 视频ID
+    title: str                     # 视频标题
+    url: str                       # 视频URL
+    duration: Optional[int] = None       # 视频时长
+    upload_date: Optional[str] = None    # 上传日期
+    downloaded: bool = False             # 是否已下载
+    transcribed: bool = False            # 是否已转录
+    file_path: Optional[str] = None      # 文件路径
+    error: Optional[str] = None          # 错误信息
 
 
 class YouTubeFetcher:
-    """YouTube video fetcher and processor."""
+    """YouTube视频抓取器和处理器"""
     
     def __init__(
         self,
@@ -49,6 +52,7 @@ class YouTubeFetcher:
         download_dir: str = "downloads",
         check_interval: timedelta = timedelta(hours=1)
     ):
+        """初始化YouTube抓取器"""
         self.scheduler = scheduler
         self.transcription_service = transcription_service
         self.download_dir = Path(download_dir)
@@ -58,7 +62,7 @@ class YouTubeFetcher:
         self.channels: Dict[str, YouTubeChannel] = {}
         self.processed_videos: Set[str] = set()
         
-        # Ensure download directory exists
+        # 确保下载目录存在
         self.download_dir.mkdir(parents=True, exist_ok=True)
     
     async def add_channel(
