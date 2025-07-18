@@ -50,6 +50,27 @@ class Settings(BaseSettings):
     alibaba_access_key_secret: Optional[str] = Field(default=None, env="ALIBABA_ACCESS_KEY_SECRET")
     alibaba_app_key: Optional[str] = Field(default=None, env="ALIBABA_APP_KEY")
     
+    # Alibaba Cloud Translation Configuration
+    alibaba_translation_endpoint: str = Field(default="mt.cn-hangzhou.aliyuncs.com", env="ALIBABA_TRANSLATION_ENDPOINT")
+    alibaba_translation_region: str = Field(default="cn-hangzhou", env="ALIBABA_TRANSLATION_REGION")
+    
+    # Social Media Integration Configuration
+    # YouTube API
+    youtube_api_key: Optional[str] = Field(default=None, env="YOUTUBE_API_KEY")
+    youtube_client_id: Optional[str] = Field(default=None, env="YOUTUBE_CLIENT_ID")
+    youtube_client_secret: Optional[str] = Field(default=None, env="YOUTUBE_CLIENT_SECRET")
+    
+    # Twitter API
+    twitter_api_key: Optional[str] = Field(default=None, env="TWITTER_API_KEY")
+    twitter_api_secret: Optional[str] = Field(default=None, env="TWITTER_API_SECRET")
+    twitter_access_token: Optional[str] = Field(default=None, env="TWITTER_ACCESS_TOKEN")
+    twitter_access_token_secret: Optional[str] = Field(default=None, env="TWITTER_ACCESS_TOKEN_SECRET")
+    
+    # Social Media Publishing Settings
+    social_media_history_file: Path = Field(default_factory=lambda: Path.cwd() / "social_media_history.json", env="SOCIAL_MEDIA_HISTORY_FILE")
+    auto_publish_enabled: bool = Field(default=False, env="AUTO_PUBLISH_ENABLED")
+    default_publish_platforms: List[str] = Field(default_factory=list, env="DEFAULT_PUBLISH_PLATFORMS")
+    
     # Redis Configuration (for Celery)
     redis_url: str = Field(default="redis://localhost:6379/0", env="REDIS_URL")
     
@@ -252,3 +273,8 @@ class Settings(BaseSettings):
 
 # Global settings instance
 settings = Settings()
+
+
+def get_settings() -> Settings:
+    """Get the global settings instance."""
+    return settings

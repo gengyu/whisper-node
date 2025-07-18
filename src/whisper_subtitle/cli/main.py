@@ -11,7 +11,7 @@ from rich.console import Console
 from rich.logging import RichHandler
 
 from ..config.settings import settings
-from .commands import transcribe, server, youtube
+from .commands import transcribe, server, youtube, translate, social
 
 console = Console()
 
@@ -95,6 +95,8 @@ def cli(ctx, verbose: bool, config: Optional[Path]):
 cli.add_command(transcribe.transcribe)
 cli.add_command(server.server)
 cli.add_command(youtube.youtube)
+cli.add_command(translate.translate)
+cli.add_command(social.social)
 
 
 @cli.command()

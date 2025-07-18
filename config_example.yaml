@@ -1,0 +1,125 @@
+# Example configuration for Whisper Subtitle Generator
+# Copy this file to config.yaml and update with your actual credentials
+
+# Basic settings
+app:
+  name: "Whisper Subtitle Generator"
+  version: "1.0.0"
+  debug: false
+
+# Server settings
+server:
+  host: "0.0.0.0"
+  port: 8000
+  reload: false
+
+# Database settings
+database:
+  url: "sqlite:///./whisper_subtitle.db"
+  echo: false
+
+# File storage settings
+files:
+  upload_dir: "./uploads"
+  output_dir: "./outputs"
+  temp_dir: "./temp"
+  max_file_size: 104857600  # 100MB
+  allowed_extensions: [".mp4", ".avi", ".mov", ".mkv", ".mp3", ".wav", ".m4a"]
+
+# YouTube download settings
+youtube:
+  download_dir: "./downloads"
+  max_duration: 3600  # 1 hour
+  quality: "best[height<=720]"
+  audio_format: "mp3"
+
+# Engine settings
+engines:
+  default: "whisper"
+  whisper:
+    model: "base"
+    device: "auto"
+    compute_type: "auto"
+  faster_whisper:
+    model: "base"
+    device: "auto"
+    compute_type: "auto"
+  # Alibaba Cloud ASR (uncomment and configure if available)
+  # alibaba_asr:
+  #   access_key_id: "your_access_key_id"
+  #   access_key_secret: "your_access_key_secret"
+  #   region: "cn-shanghai"
+  #   app_key: "your_app_key"
+
+# Translation settings (Alibaba Cloud)
+translation:
+  alibaba_cloud:
+    access_key_id: "your_access_key_id"  # Replace with your actual access key ID
+    access_key_secret: "your_access_key_secret"  # Replace with your actual access key secret
+    endpoint: "mt.cn-hangzhou.aliyuncs.com"  # Translation service endpoint
+    region: "cn-hangzhou"  # Service region
+  
+  # Default translation settings
+  default_source_language: "auto"  # Auto-detect source language
+  default_target_language: "en"    # Default target language
+  batch_size: 10  # Number of subtitles to translate in one batch
+  preserve_timing: true  # Keep original subtitle timing
+
+# Social Media Integration
+social_media:
+  # Publishing settings
+  auto_publish: false  # Whether to auto-publish after transcription
+  default_platforms: ["youtube"]  # Default platforms for publishing
+  history_file: "./social_media_history.json"  # File to store publish history
+  
+  # YouTube API configuration
+  youtube:
+    api_key: "your_youtube_api_key"  # Replace with your YouTube API key
+    client_id: "your_youtube_client_id"  # Replace with your YouTube client ID
+    client_secret: "your_youtube_client_secret"  # Replace with your YouTube client secret
+    redirect_uri: "http://localhost:8080/oauth2callback"
+    scopes:
+      - "https://www.googleapis.com/auth/youtube.upload"
+      - "https://www.googleapis.com/auth/youtube"
+  
+  # Twitter API configuration
+  twitter:
+    api_key: "your_twitter_api_key"  # Replace with your Twitter API key
+    api_secret: "your_twitter_api_secret"  # Replace with your Twitter API secret
+    access_token: "your_twitter_access_token"  # Replace with your Twitter access token
+    access_token_secret: "your_twitter_access_token_secret"  # Replace with your Twitter access token secret
+    bearer_token: "your_twitter_bearer_token"  # Replace with your Twitter bearer token (optional)
+
+# Task settings
+tasks:
+  max_concurrent: 3
+  cleanup_interval: 3600  # 1 hour
+  max_task_age: 86400     # 24 hours
+
+# API settings
+api:
+  cors_origins: ["*"]
+  cors_methods: ["GET", "POST", "PUT", "DELETE"]
+  cors_headers: ["*"]
+  rate_limit: 100  # requests per minute
+
+# Security settings
+security:
+  secret_key: "your-secret-key-here"  # Change this to a secure random string
+  algorithm: "HS256"
+  access_token_expire_minutes: 30
+
+# Logging settings
+logging:
+  level: "INFO"
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  file: "./logs/app.log"
+  max_size: 10485760  # 10MB
+  backup_count: 5
+
+# Performance settings
+performance:
+  worker_processes: 1
+  max_requests: 1000
+  max_requests_jitter: 50
+  timeout: 300  # 5 minutes
