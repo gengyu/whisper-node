@@ -7,7 +7,7 @@ import sys
 import tempfile
 import time
 from pathlib import Path
-from unittest.mock import Mock, patch, AsyncMock
+from unittest.mock import Mock, patch, AsyncMock, PropertyMock, MagicMock
 
 # 添加src目录到Python路径
 sys.path.insert(0, str(Path(__file__).parent / "src"))
@@ -109,10 +109,9 @@ class WhisperKitEngineTest:
         """测试引擎初始化（模拟环境）"""
         try:
             # 模拟macOS和Apple Silicon环境
-            with patch.object(settings, 'is_macos', True), \
-                 patch.object(settings, 'is_apple_silicon', True), \
-                 patch.object(self.engine.cli_path, 'exists', return_value=True), \
-                 patch.object(self.engine.model_path, 'exists', return_value=True), \
+            with patch.object(type(settings), 'is_macos', new_callable=PropertyMock, return_value=True), \
+                 patch.object(type(settings), 'is_apple_silicon', new_callable=PropertyMock, return_value=True), \
+                 patch('pathlib.Path.exists', return_value=True), \
                  patch.object(self.engine, '_test_cli', new_callable=AsyncMock):
                 
                 await self.engine.initialize()
@@ -129,10 +128,9 @@ class WhisperKitEngineTest:
         """测试初始化后的就绪状态"""
         try:
             # 模拟所有条件满足
-            with patch.object(settings, 'is_macos', True), \
-                 patch.object(settings, 'is_apple_silicon', True), \
-                 patch.object(self.engine.cli_path, 'exists', return_value=True), \
-                 patch.object(self.engine.model_path, 'exists', return_value=True):
+            with patch.object(type(settings), 'is_macos', new_callable=PropertyMock, return_value=True), \
+                 patch.object(type(settings), 'is_apple_silicon', new_callable=PropertyMock, return_value=True), \
+                 patch('pathlib.Path.exists', return_value=True):
                 
                 is_ready = await self.engine.is_ready()
                 
@@ -256,7 +254,7 @@ class WhisperKitEngineTest:
         """测试平台要求检查"""
         try:
             # 测试非macOS环境
-            with patch.object(settings, 'is_macos', False):
+            with patch.object(type(settings), 'is_macos', new_callable=PropertyMock, return_value=False):
                 engine = WhisperKitEngine()
                 try:
                     await engine.initialize()
@@ -265,8 +263,8 @@ class WhisperKitEngineTest:
                     assert "only available on macOS" in str(e)
             
             # 测试非Apple Silicon环境
-            with patch.object(settings, 'is_macos', True), \
-                 patch.object(settings, 'is_apple_silicon', False):
+            with patch.object(type(settings), 'is_macos', new_callable=PropertyMock, return_value=True), \
+                 patch.object(type(settings), 'is_apple_silicon', new_callable=PropertyMock, return_value=False):
                 engine = WhisperKitEngine()
                 try:
                     await engine.initialize()
