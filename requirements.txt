@@ -24,9 +24,9 @@ faster-whisper>=0.9.0
 # Alibaba Cloud services
 # alibabacloud-nls-realtime>=1.0.0  # ASR (commented out due to availability issues)
 # oss2>=2.18.4
-alibabacloud-mt20181012>=1.0.0  # Machine Translation
-alibabacloud-tea-openapi>=0.3.0
-alibabacloud-tea-util>=0.3.0
+# alibabacloud-mt20181012>=1.0.0  # Machine Translation
+# alibabacloud-tea-openapi>=0.3.0
+# alibabacloud-tea-util>=0.3.0
 
 # Social Media APIs
 # google-api-python-client>=2.0.0  # YouTube API

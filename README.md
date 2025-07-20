@@ -117,7 +117,86 @@ docker run -d \
 
 **步骤：**
 
-1. **安装FFmpeg**
+1. **克隆项目**
+   ```bash
+   git clone https://github.com/whisper-subtitle/whisper-subtitle.git
+   cd whisper-subtitle
+   ```
+
+2. **创建虚拟环境**
+   ```bash
+   python -m venv .venv
+   source .venv/bin/activate  # Windows: .venv\Scripts\activate
+   ```
+
+3. **安装依赖（使用国内镜像）**
+   ```bash
+   pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple --trusted-host pypi.tuna.tsinghua.edu.cn
+   ```
+
+4. **安装FFmpeg**
+   ```bash
+   # macOS
+   brew install ffmpeg
+   
+   # Ubuntu/Debian
+   sudo apt update && sudo apt install ffmpeg
+   
+   # Windows (使用Chocolatey)
+   choco install ffmpeg
+   ```
+
+5. **运行测试**
+   ```bash
+   # 测试安装
+   python test_installation.py
+   
+   # 测试核心功能
+   python test_core_functionality.py
+   
+   # 快速工作流测试
+   python quick_workflow_test.py
+   ```
+
+## 🚀 启动和使用
+
+### 启动Web服务器
+
+```bash
+# 激活虚拟环境
+source .venv/bin/activate  # Windows: .venv\Scripts\activate
+
+# 启动服务器
+PYTHONPATH=src python -m whisper_subtitle.cli server --host 127.0.0.1 --port 8000
+
+# 或者使用简化命令
+PYTHONPATH=src python -m whisper_subtitle.cli server
+```
+
+服务器启动后，访问：
+- **Web界面**: http://127.0.0.1:8000
+- **API文档**: http://127.0.0.1:8000/docs
+- **健康检查**: http://127.0.0.1:8000/health
+
+### 命令行使用
+
+```bash
+# 查看帮助
+PYTHONPATH=src python -m whisper_subtitle.cli --help
+
+# 查看系统信息
+PYTHONPATH=src python -m whisper_subtitle.cli info
+
+# 检查引擎状态
+PYTHONPATH=src python -m whisper_subtitle.cli check
+
+# 转录音频文件
+PYTHONPATH=src python -m whisper_subtitle.cli transcribe audio.mp3
+
+# 使用特定引擎
+PYTHONPATH=src python -m whisper_subtitle.cli transcribe audio.mp3 --engine faster_whisper
+```
+
 ## 🐳 Docker部署
 
 ### 基础部署

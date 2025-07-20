@@ -22,11 +22,11 @@ async def test_youtube_transcribe():
         
         # Get video info first
         print(f"Getting video info for: {test_url}")
-        info = await downloader.get_video_info(test_url)
-        
-        print(f"Video title: {info.get('title', 'Unknown')}")
-        print(f"Duration: {info.get('duration', 'Unknown')} seconds")
-        print(f"Uploader: {info.get('uploader', 'Unknown')}")
+        # info = await downloader.get_video_info(test_url)
+        #
+        # print(f"Video title: {info.get('title', 'Unknown')}")
+        # print(f"Duration: {info.get('duration', 'Unknown')} seconds")
+        # print(f"Uploader: {info.get('uploader', 'Unknown')}")
         
         # Download audio only for transcription
         print("\nDownloading audio...")
@@ -34,7 +34,7 @@ async def test_youtube_transcribe():
         downloaded_file = await downloader.download_video(
             url=test_url,
             output_path=None,  # Auto-generate path
-            audio_only=True
+            audio_only=False
         )
         
         if downloaded_file and downloaded_file.exists():
@@ -49,7 +49,9 @@ async def test_youtube_transcribe():
         
         result = await transcriber.transcribe_audio(
             audio_path=downloaded_file,
-            engine_name="openai_whisper",  # Use OpenAI Whisper as it's most reliable
+            # engine_name="openai_whisper",  # Use OpenAI Whisper as it's most reliable
+            engine_name="whisperkit",
+            # engine_name="whispercpp",
             model_name="tiny",  # Use tiny model for faster processing
             language="en",  # English
             output_format="srt"
